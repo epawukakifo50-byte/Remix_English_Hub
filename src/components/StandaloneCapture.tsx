@@ -24,22 +24,6 @@ export function StandaloneCapture() {
   useEffect(() => {
     document.title = 'Quick Capture';
     fetchContexts().then(setContexts);
-    
-    // Attempt to resize the window exactly to the container's size if possible
-    setTimeout(() => {
-      try {
-        if (containerRef.current) {
-          const width = containerRef.current.offsetWidth;
-          const height = containerRef.current.offsetHeight;
-          // Add a small buffer for window chrome
-          window.resizeTo(width + 16, height + 40);
-        } else {
-          window.resizeTo(512, 620);
-        }
-      } catch (e) {
-        // window.resizeTo might be blocked by browser settings
-      }
-    }, 100);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

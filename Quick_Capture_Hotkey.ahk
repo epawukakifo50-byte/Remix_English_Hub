@@ -7,8 +7,8 @@
 ^+e::
 {
     ; ^+e means Ctrl + Shift + E
-    ; Width and height exactly matching the max-w-lg container plus some margin
-    Width := 530
+    ; Width matching the max-w-lg container (512px) and height
+    Width := 512
     Height := 620
     
     ; Run Chrome in app mode (no address bar)
@@ -21,9 +21,15 @@
         WinRestore "Quick Capture"
         Sleep 100
         
+        ; Remove the title bar completely (WS_CAPTION = 0x00C00000)
+        WinSetStyle "-0x00C00000", "Quick Capture"
+        
         ; Center the window on the screen
         X := Round((A_ScreenWidth - Width) / 2)
         Y := Round((A_ScreenHeight - Height) / 2)
         WinMove X, Y, Width, Height, "Quick Capture"
+        
+        ; Apply a rounded corner clipping region (radius 40px)
+        WinSetRegion "0-0 w" Width " h" Height " R40-40", "Quick Capture"
     }
 }

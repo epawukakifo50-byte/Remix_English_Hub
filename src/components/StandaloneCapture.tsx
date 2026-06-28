@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Terminal, X, CheckSquare } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, CheckSquare, Trash2 } from 'lucide-react';
 import { addWord, fetchContexts } from '../api';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ComboBox } from './ComboBox';
 
 export function StandaloneCapture() {
@@ -19,10 +19,27 @@ export function StandaloneCapture() {
   const [contexts, setContexts] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.title = 'Quick Capture';
     fetchContexts().then(setContexts);
+    
+    // Attempt to resize the window exactly to the container's size if possible
+    setTimeout(() => {
+      try {
+        if (containerRef.current) {
+          const width = containerRef.current.offsetWidth;
+          const height = containerRef.current.offsetHeight;
+          // Add a small buffer for window chrome
+          window.resizeTo(width + 16, height + 40);
+        } else {
+          window.resizeTo(512, 620);
+        }
+      } catch (e) {
+        // window.resizeTo might be blocked by browser settings
+      }
+    }, 100);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,150 +67,169 @@ export function StandaloneCapture() {
     }
   };
 
-  if (success) {
-    return (
-      <div className="h-screen w-screen bg-transparent flex flex-col items-center justify-center p-6 space-y-6 font-mono relative overflow-hidden">
-        <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
-          <CheckSquare size={64} className="text-accent-emerald relative z-10 mb-6" />
-          <h2 className="text-3xl font-bold text-white uppercase tracking-widest relative z-10">DATA_CAPTURED</h2>
-          <p className="text-neutral-500 text-xs uppercase tracking-widest relative z-10 mt-2">SAFE TO TERMINATE CONNECTION</p>
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
-    <div className="h-screen w-screen bg-transparent p-6 flex flex-col font-mono selection:bg-neon selection:text-black relative overflow-hidden">
+    <div className="h-screen w-screen bg-transparent flex items-center justify-center font-mono selection:bg-neon selection:text-black overflow-hidden p-0 m-0">
       
-      <div className="relative z-10 flex justify-between items-center mb-6 border-b border-neutral-800 pb-4 max-w-xl mx-auto w-full pt-8">
-        <h2 className="text-2xl font-bold text-white uppercase tracking-widest flex items-center gap-3">
-          <Terminal size={24} className="text-neon" /> [ INIT_CAPTURE ]
-        </h2>
-        <button onClick={() => window.close()} className="text-neutral-500 hover:text-neon transition hover:scale-110">
-          <X size={24} />
-        </button>
-      </div>
-      
-      <form onSubmit={handleSubmit} className="space-y-6 flex-1 flex flex-col relative z-10 max-w-xl mx-auto w-full bg-neutral-900/60 p-8 rounded-tl-3xl rounded-br-3xl border border-neutral-800 shadow-xl backdrop-blur-md">
-        <div className="absolute top-0 left-0 w-16 h-1 bg-gradient-to-r from-neon to-transparent"></div>
-        
-        <div className="flex items-center gap-2 mb-2">
-          <input 
-            type="checkbox" 
-            id="isIrregular"
-            checked={isIrregular}
-            onChange={(e) => setIsIrregular(e.target.checked)}
-            className="accent-neon w-4 h-4"
-          />
-          <label htmlFor="isIrregular" className="text-xs uppercase tracking-widest text-neutral-400 font-bold cursor-pointer">
-            IRREGULAR VERB
-          </label>
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-neutral-500 mb-2 uppercase tracking-widest">Target_Entity</label>
-          {isIrregular ? (
-            <div className="grid grid-cols-3 gap-2">
-              <input 
-                autoFocus
-                type="text" 
-                value={baseForm} 
-                onChange={e => setBaseForm(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 px-4 py-3 text-neon font-bold focus:border-neon focus:ring-1 focus:ring-neon focus:outline-none uppercase rounded-tl-xl rounded-br-xl transition-all"
-                placeholder="V1 (PRESENT)"
-                required
-              />
-              <input 
-                type="text" 
-                value={pastForm} 
-                onChange={e => setPastForm(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 px-4 py-3 text-neon font-bold focus:border-neon focus:ring-1 focus:ring-neon focus:outline-none uppercase rounded-tl-xl rounded-br-xl transition-all"
-                placeholder="V2 (PAST)"
-                required
-              />
-              <input 
-                type="text" 
-                value={participleForm} 
-                onChange={e => setParticipleForm(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 px-4 py-3 text-neon font-bold focus:border-neon focus:ring-1 focus:ring-neon focus:outline-none uppercase rounded-tl-xl rounded-br-xl transition-all"
-                placeholder="V3"
-                required
-              />
-            </div>
-          ) : (
-            <input 
-              autoFocus
-              type="text" 
-              value={word} 
-              onChange={e => setWord(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-800 px-4 py-3 text-neon font-bold focus:border-neon focus:ring-1 focus:ring-neon focus:outline-none uppercase rounded-tl-xl rounded-br-xl transition-all"
-              placeholder="E.G. OBFUSCATE"
-              required
-            />
-          )}
-        </div>
-        <div>
-          <label className="block text-xs font-bold text-neutral-500 mb-2 uppercase tracking-widest">Translation_Hash</label>
-          {isIrregular ? (
-            <div className="grid grid-cols-3 gap-2">
-              <input 
-                type="text" 
-                value={baseTrans} 
-                onChange={e => setBaseTrans(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 px-4 py-3 text-white focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none rounded-tl-xl rounded-br-xl transition-all"
-                placeholder="V1 Trans"
-              />
-              <input 
-                type="text" 
-                value={pastTrans} 
-                onChange={e => setPastTrans(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 px-4 py-3 text-white focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none rounded-tl-xl rounded-br-xl transition-all"
-                placeholder="V2 Trans"
-              />
-              <input 
-                type="text" 
-                value={participleTrans} 
-                onChange={e => setParticipleTrans(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 px-4 py-3 text-white focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none rounded-tl-xl rounded-br-xl transition-all"
-                placeholder="V3 Trans"
-              />
-            </div>
-          ) : (
-            <input 
-              type="text" 
-              value={translation} 
-              onChange={e => setTranslation(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-800 px-4 py-3 text-white focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none rounded-tl-xl rounded-br-xl transition-all"
-            />
-          )}
-        </div>
-        <div>
-          <label className="block text-xs font-bold text-neutral-500 mb-2 uppercase tracking-widest">Source_Reference</label>
-          <ComboBox
-            options={contexts}
-            value={source}
-            onChange={setSource}
-            placeholder="Select or type source"
-          />
-        </div>
-        <div className="flex-1 flex flex-col">
-          <label className="block text-xs font-bold text-neutral-500 mb-2 uppercase tracking-widest">Telemetry_Notes</label>
-          <textarea 
-            value={content} 
-            onChange={e => setContent(e.target.value)}
-            className="w-full flex-1 bg-neutral-950 border border-neutral-800 px-4 py-3 text-neutral-300 focus:border-accent-emerald focus:ring-1 focus:ring-accent-emerald focus:outline-none resize-none rounded-tl-xl rounded-br-xl transition-all min-h-[100px]"
-          />
-        </div>
-        <div className="pt-6 border-t border-neutral-800 mt-auto">
-          <button 
-            type="submit" 
-            disabled={isSubmitting || (!isIrregular && !word) || (isIrregular && (!baseForm || !pastForm || !participleForm))}
-            className="w-full bg-neutral-800 text-neutral-200 font-bold uppercase tracking-widest py-4 border border-neutral-700 hover:border-transparent hover:bg-neon hover:text-black hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:bg-neutral-800 disabled:hover:text-neutral-200 disabled:hover:scale-100 disabled:hover:border-neutral-700 rounded-tl-2xl rounded-br-2xl shadow-md"
+      <AnimatePresence mode="wait">
+        {success ? (
+          <motion.div 
+            key="success"
+            initial={{ scale: 0.9, opacity: 0 }} 
+            animate={{ scale: 1, opacity: 1 }} 
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="flex flex-col items-center bg-neutral-900 border border-neutral-700 p-12 w-full max-w-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] rounded-tl-3xl rounded-br-3xl relative"
           >
-            {isSubmitting ? 'PROCESSING...' : 'TRANSMIT_TO_HUB'}
-          </button>
-        </div>
-      </form>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon via-accent-blue to-accent-emerald"></div>
+            <CheckSquare size={64} className="text-accent-emerald mb-6" />
+            <h2 className="text-3xl font-bold text-white uppercase tracking-widest text-center">DATA_CAPTURED</h2>
+            <p className="text-neutral-500 text-xs uppercase tracking-widest mt-2 text-center">SAFE TO TERMINATE CONNECTION</p>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="form"
+            ref={containerRef}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-neutral-900 border border-neutral-700 p-6 w-full max-w-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] rounded-tl-3xl rounded-br-3xl relative overflow-hidden"
+          >
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon via-accent-blue to-accent-emerald"></div>
+
+            <div className="flex justify-between items-center mb-6 border-b border-neutral-800 pb-4">
+              <h2 className="text-xl font-bold text-neutral-100 uppercase tracking-widest">Init Capture</h2>
+              <button onClick={() => window.close()} className="text-neutral-500 hover:text-neon hover:scale-110 transition p-1">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <input 
+                  type="checkbox" 
+                  id="isIrregular"
+                  checked={isIrregular}
+                  onChange={(e) => setIsIrregular(e.target.checked)}
+                  className="accent-neon w-4 h-4"
+                />
+                <label htmlFor="isIrregular" className="text-xs uppercase tracking-widest text-neutral-400 font-bold cursor-pointer">
+                  IRREGULAR VERB
+                </label>
+              </div>
+              
+              <div>
+                <label className="block text-sm text-neutral-400 mb-1">Target Entity</label>
+                {isIrregular ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    <input 
+                      autoFocus
+                      type="text" 
+                      value={baseForm} 
+                      onChange={e => setBaseForm(e.target.value)}
+                      className="w-full bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-neon focus:border-neon focus:ring-1 focus:ring-neon focus:outline-none uppercase font-bold rounded-tl-xl rounded-br-xl transition-all"
+                      placeholder="V1 (PRESENT)"
+                      required
+                    />
+                    <input 
+                      type="text" 
+                      value={pastForm} 
+                      onChange={e => setPastForm(e.target.value)}
+                      className="w-full bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-neon focus:border-neon focus:ring-1 focus:ring-neon focus:outline-none uppercase font-bold rounded-tl-xl rounded-br-xl transition-all"
+                      placeholder="V2 (PAST)"
+                      required
+                    />
+                    <input 
+                      type="text" 
+                      value={participleForm} 
+                      onChange={e => setParticipleForm(e.target.value)}
+                      className="w-full bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-neon focus:border-neon focus:ring-1 focus:ring-neon focus:outline-none uppercase font-bold rounded-tl-xl rounded-br-xl transition-all"
+                      placeholder="V3"
+                      required
+                    />
+                  </div>
+                ) : (
+                  <input 
+                    autoFocus
+                    type="text" 
+                    value={word} 
+                    onChange={e => setWord(e.target.value)}
+                    className="w-full bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-neon focus:border-neon focus:ring-1 focus:ring-neon focus:outline-none uppercase font-bold rounded-tl-xl rounded-br-xl transition-all"
+                    placeholder="E.G. OBFUSCATE"
+                    required
+                  />
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-xs text-neutral-500 mb-1 tracking-wider uppercase">Translation Data</label>
+                {isIrregular ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    <input 
+                      type="text" 
+                      value={baseTrans} 
+                      onChange={e => setBaseTrans(e.target.value)}
+                      className="w-full bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-white focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none rounded-tl-xl rounded-br-xl transition-all"
+                      placeholder="V1 Trans"
+                    />
+                    <input 
+                      type="text" 
+                      value={pastTrans} 
+                      onChange={e => setPastTrans(e.target.value)}
+                      className="w-full bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-white focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none rounded-tl-xl rounded-br-xl transition-all"
+                      placeholder="V2 Trans"
+                    />
+                    <input 
+                      type="text" 
+                      value={participleTrans} 
+                      onChange={e => setParticipleTrans(e.target.value)}
+                      className="w-full bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-white focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none rounded-tl-xl rounded-br-xl transition-all"
+                      placeholder="V3 Trans"
+                    />
+                  </div>
+                ) : (
+                  <input 
+                    type="text" 
+                    value={translation} 
+                    onChange={e => setTranslation(e.target.value)}
+                    className="w-full bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-white focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none rounded-tl-xl rounded-br-xl transition-all"
+                    placeholder="Enter translation"
+                  />
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-xs text-neutral-500 mb-1 tracking-wider uppercase">Context Link</label>
+                <ComboBox
+                  options={contexts}
+                  value={source}
+                  onChange={setSource}
+                  placeholder="Select or type context"
+                  inputClassName="py-2.5"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs text-neutral-500 mb-1 tracking-wider uppercase">Notes Log</label>
+                <textarea 
+                  value={content} 
+                  onChange={e => setContent(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 px-4 py-2.5 text-neutral-300 focus:border-accent-emerald focus:ring-1 focus:ring-accent-emerald focus:outline-none h-24 resize-none rounded-tl-xl rounded-br-xl transition-all"
+                  placeholder="Add logs..."
+                />
+              </div>
+              
+              <div className="pt-4 border-t border-neutral-800">
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting || (!isIrregular && !word) || (isIrregular && (!baseForm || !pastForm || !participleForm))}
+                  className="w-full bg-neutral-800 text-neutral-100 font-bold uppercase tracking-widest py-3 hover:bg-neon hover:text-black hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:bg-neutral-800 disabled:hover:text-neutral-100 disabled:hover:scale-100 rounded-tl-2xl rounded-br-2xl border border-neutral-700 hover:border-transparent"
+                >
+                  {isSubmitting ? 'PROCESSING...' : 'COMMIT DATA'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

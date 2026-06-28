@@ -7,9 +7,9 @@
 ^+e::
 {
     ; ^+e means Ctrl + Shift + E
-    ; Calculate width as 30% of screen width, height as 60% of screen height
-    Width := Round(A_ScreenWidth * 0.30)
-    Height := Round(A_ScreenHeight * 0.60)
+    ; Width and height exactly matching the max-w-lg container plus some margin
+    Width := 530
+    Height := 620
     
     ; Run Chrome in app mode (no address bar)
     Run 'chrome.exe --app="http://localhost:3000/?mode=capture" --window-size=' Width ',' Height

@@ -7,6 +7,10 @@
 ^+e::
 {
     ; ^+e means Ctrl + Shift + E
+    ; Calculate width as 30% of screen width, height as 60% of screen height
+    Width := Round(A_ScreenWidth * 0.30)
+    Height := Round(A_ScreenHeight * 0.60)
+    
     ; Change "chrome.exe" to "msedge.exe" if you use Edge
-    Run 'chrome.exe --app="http://localhost:3000/?mode=capture" --window-size=400,600'
+    Run 'chrome.exe --app="http://localhost:3000/?mode=capture" --window-size=' Width ',' Height
 }

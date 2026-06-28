@@ -17,6 +17,9 @@ echo Waiting for server to start...
 timeout /t 3 /nobreak > NUL
 
 echo Opening English Hub Dashboard...
-start http://localhost:3000
+start chrome --app="http://localhost:3000"
+
+echo Launching Quick Capture Hotkey...
+start Quick_Capture_Hotkey.ahk
 
 exit

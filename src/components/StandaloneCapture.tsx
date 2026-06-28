@@ -52,7 +52,7 @@ export function StandaloneCapture() {
   };
 
   return (
-    <div className="h-screen w-screen bg-transparent flex items-start justify-center pt-8 px-4 pb-4 font-mono selection:bg-neon selection:text-black overflow-auto m-0">
+    <div className="h-screen w-screen bg-transparent flex items-center justify-center p-4 font-mono selection:bg-neon selection:text-black overflow-hidden m-0 box-border">
       
       <AnimatePresence mode="wait">
         {success ? (
@@ -61,7 +61,7 @@ export function StandaloneCapture() {
             initial={{ scale: 0.9, opacity: 0 }} 
             animate={{ scale: 1, opacity: 1 }} 
             exit={{ scale: 0.9, opacity: 0 }}
-            className="flex flex-col items-center bg-neutral-900 border border-neutral-700 p-12 w-full max-w-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] rounded-tl-3xl rounded-br-3xl relative mt-4"
+            className="flex flex-col items-center bg-neutral-900 border border-neutral-700 p-12 w-full max-w-lg shadow-[0_10px_40px_rgba(0,0,0,0.5)] rounded-tl-3xl rounded-br-3xl relative"
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon via-accent-blue to-accent-emerald"></div>
             <CheckSquare size={64} className="text-accent-emerald mb-6" />

@@ -11,6 +11,19 @@
     Width := Round(A_ScreenWidth * 0.30)
     Height := Round(A_ScreenHeight * 0.60)
     
-    ; Change "chrome.exe" to "msedge.exe" if you use Edge
+    ; Run Chrome in app mode (no address bar)
     Run 'chrome.exe --app="http://localhost:3000/?mode=capture" --window-size=' Width ',' Height
+    
+    ; Wait for the Quick Capture window to appear (timeout 3 seconds)
+    if WinWait("Quick Capture", , 3)
+    {
+        ; Force the window out of maximized state in case Chrome inherited it
+        WinRestore "Quick Capture"
+        Sleep 100
+        
+        ; Center the window on the screen
+        X := Round((A_ScreenWidth - Width) / 2)
+        Y := Round((A_ScreenHeight - Height) / 2)
+        WinMove X, Y, Width, Height, "Quick Capture"
+    }
 }

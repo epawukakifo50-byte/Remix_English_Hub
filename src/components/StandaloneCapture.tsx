@@ -21,6 +21,7 @@ export function StandaloneCapture() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
+    document.title = 'Quick Capture';
     fetchContexts().then(setContexts);
   }, []);
 

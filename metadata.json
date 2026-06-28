@@ -1,0 +1,8 @@
+{
+  "name": "Remix: English Hub",
+  "description": "Linguistic data center for English vocabulary and contexts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
